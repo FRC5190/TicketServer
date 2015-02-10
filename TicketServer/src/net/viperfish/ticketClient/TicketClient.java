@@ -16,10 +16,11 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import java.awt.Color;
+import java.awt.Window.Type;
 
 public class TicketClient {
 
-	private JFrame frame;
+	private JFrame frmTicketServer;
 	Thread worker;
 	ClientWorker w;
 	Thread updater;
@@ -38,7 +39,7 @@ public class TicketClient {
 			public void run() {
 				try {
 					TicketClient window = new TicketClient();
-					window.frame.setVisible(true);
+					window.frmTicketServer.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -91,21 +92,25 @@ public class TicketClient {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame();
-		frame.setForeground(Color.RED);
-		frame.setBounds(100, 100, 457, 210);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(new MigLayout("", "[][][][][grow][][]", "[][][][][][]"));
+		frmTicketServer = new JFrame();
+		frmTicketServer.setType(Type.UTILITY);
+		frmTicketServer.setTitle("5190 Ticket Server");
+		frmTicketServer.setBackground(Color.YELLOW);
+		frmTicketServer.setForeground(Color.RED);
+		frmTicketServer.setBounds(100, 100, 270, 174);
+		frmTicketServer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frmTicketServer.getContentPane().setLayout(new MigLayout("", "[][][][][grow][][]", "[][][][][][][][][][]"));
 		
 		lblIp = new JLabel("IP");
-		frame.getContentPane().add(lblIp, "cell 2 0");
+		frmTicketServer.getContentPane().add(lblIp, "cell 1 0");
 		
 		textField = new JTextField();
-		frame.getContentPane().add(textField, "cell 3 0 2 1,growx");
+		frmTicketServer.getContentPane().add(textField, "cell 2 0,growx");
 		textField.setColumns(10);
 		
 		btnConnect = new JButton("Connect");
-		btnConnect.setForeground(Color.RED);
+		btnConnect.setForeground(Color.white);
+		btnConnect.setBackground(Color.darkGray);
 		btnConnect.addActionListener(new ActionListener() {
 
 			@Override
@@ -123,16 +128,36 @@ public class TicketClient {
 			}
 			
 		});
-		frame.getContentPane().add(btnConnect, "cell 6 0");
+		frmTicketServer.getContentPane().add(btnConnect, "cell 4 0 2 1");
 		
 		lblMyTicket = new JLabel("Ticket");
-		frame.getContentPane().add(lblMyTicket, "cell 4 1");
+		lblMyTicket.setBackground(Color.YELLOW);
+		frmTicketServer.getContentPane().add(lblMyTicket, "cell 2 1");
 		
 		lblCurrentTicket = new JLabel("Current Ticket");
-		frame.getContentPane().add(lblCurrentTicket, "cell 4 2");
+		frmTicketServer.getContentPane().add(lblCurrentTicket, "cell 2 2");
+		
+		btnGetticket = new JButton("GetTicket");
+		btnGetticket.setForeground(Color.white);
+		btnGetticket.setBackground(Color.darkGray);
+		btnGetticket.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					w.getTicket();
+				} catch (IOException e1) {
+					JOptionPane.showMessageDialog(null, e1);
+				}
+				btnGetticket.setEnabled(false);
+			}
+			
+		});
+		frmTicketServer.getContentPane().add(btnGetticket, "cell 4 2");
 		
 		btnDone = new JButton("Done");
-		btnDone.setForeground(Color.RED);
+		btnDone.setForeground(Color.white);
+		btnDone.setBackground(Color.darkGray);
 		btnDone.addActionListener(new ActionListener() {
 
 			@Override
@@ -147,25 +172,8 @@ public class TicketClient {
 			}
 			
 		});
-		frame.getContentPane().add(btnDone, "cell 2 5");
+		frmTicketServer.getContentPane().add(btnDone, "cell 4 8");
 		btnDone.setEnabled(false);
-		
-		btnGetticket = new JButton("GetTicket");
-		btnGetticket.setForeground(Color.RED);
-		btnGetticket.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					w.getTicket();
-				} catch (IOException e1) {
-					JOptionPane.showMessageDialog(null, e1);
-				}
-				btnGetticket.setEnabled(false);
-			}
-			
-		});
-		frame.getContentPane().add(btnGetticket, "cell 6 5");
 	}
 
 }
