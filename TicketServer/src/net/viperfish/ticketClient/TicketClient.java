@@ -105,7 +105,8 @@ public class TicketClient {
 		textField.setColumns(10);
 		
 		btnConnect = new JButton("Connect");
-		btnConnect.setForeground(Color.RED);
+		btnConnect.setForeground(Color.white);
+		btnConnect.setBackground(Color.darkGray);
 		btnConnect.addActionListener(new ActionListener() {
 
 			@Override
@@ -132,7 +133,8 @@ public class TicketClient {
 		frame.getContentPane().add(lblCurrentTicket, "cell 4 2");
 		
 		btnDone = new JButton("Done");
-		btnDone.setForeground(Color.RED);
+		btnDone.setForeground(Color.white);
+		btnDone.setBackground(Color.darkGray);
 		btnDone.addActionListener(new ActionListener() {
 
 			@Override
@@ -151,7 +153,8 @@ public class TicketClient {
 		btnDone.setEnabled(false);
 		
 		btnGetticket = new JButton("GetTicket");
-		btnGetticket.setForeground(Color.RED);
+		btnGetticket.setForeground(Color.white);
+		btnGetticket.setBackground(Color.darkGray);
 		btnGetticket.addActionListener(new ActionListener() {
 
 			@Override
