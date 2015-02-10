@@ -140,7 +140,8 @@ public class TicketClient {
 						w.sendName();
 					}
 				} catch (IOException e1) {
-					textField.setText(e.toString());
+					JOptionPane.showMessageDialog(null, e1.getMessage());
+					e1.printStackTrace();
 				}
 				worker.start();
 				updater.start();

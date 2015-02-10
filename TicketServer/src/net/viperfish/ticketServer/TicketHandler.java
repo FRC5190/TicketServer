@@ -2,8 +2,6 @@ package net.viperfish.ticketServer;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -11,20 +9,25 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
+
 public class TicketHandler {
 	protected static int current;
 	protected static Map<String, Client> s;
 	protected static LinkedList<Ticket> t;
 	protected static ExecutorService pool;
 	protected static SecureRandom generator;
-	protected static ServerSocket meta;
+	protected static SSLServerSocket meta;
 	static {
 		s = new HashMap<String, Client>();
 		t = new LinkedList<Ticket>();
 		pool = Executors.newCachedThreadPool();
 		generator = new SecureRandom();
 		try {
-			meta = new ServerSocket(8000);
+			meta = (SSLServerSocket) SSLServerSocketFactory.getDefault()
+					.createServerSocket(8000);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -37,10 +40,14 @@ public class TicketHandler {
 
 			@Override
 			public void run() {
-				Socket temp;
+				SSLSocket temp;
 				while (!Thread.interrupted()) {
 					try {
-						temp = meta.accept();
+						temp = (SSLSocket) meta.accept();
+						temp.setEnabledCipherSuites(temp
+								.getSupportedCipherSuites());
+						temp.setEnabledProtocols(temp.getSupportedProtocols());
+						temp.startHandshake();
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -55,7 +62,8 @@ public class TicketHandler {
 
 	public synchronized static void subscribe(Client c) {
 		s.put(c.getUsername(), c);
-		c.pushCurrent(t.getFirst());
+		if (!t.isEmpty())
+			c.pushCurrent(t.getFirst());
 	}
 
 	public synchronized static void unSubscribe(String id) {

@@ -2,14 +2,16 @@ package net.viperfish.ticketClient;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+
 public class ClientWorker implements Runnable {
 
-	Socket sock;
+	SSLSocket sock;
 	SocketAddress server;
 	LinkedList<Display> toRepresent;
 	protected String currentCredential;
@@ -19,10 +21,12 @@ public class ClientWorker implements Runnable {
 	}
 
 	public void connect(String ip) throws IOException {
-		sock = new Socket();
 		server = new InetSocketAddress(ip, 8000);
+		sock = (SSLSocket) SSLSocketFactory.getDefault().createSocket();
+		sock.setEnabledCipherSuites(sock.getSupportedCipherSuites());
+		sock.setEnabledProtocols(sock.getEnabledProtocols());
 		try {
-			sock.connect(server, 20000);
+			sock.connect(server);
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw e;
