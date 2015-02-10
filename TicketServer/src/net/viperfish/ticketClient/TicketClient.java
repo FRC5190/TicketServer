@@ -125,6 +125,7 @@ public class TicketClient {
 		textField.setColumns(10);
 
 		btnConnect = new JButton("Connect");
+		btnConnect.setToolTipText("Connect to the server at the ip address");
 		btnConnect.setForeground(Color.white);
 		btnConnect.setBackground(Color.darkGray);
 		btnConnect.addActionListener(new ActionListener() {
@@ -157,6 +158,7 @@ public class TicketClient {
 		frmTicketServer.getContentPane().add(lblCurrentTicket, "cell 2 2");
 
 		btnGetticket = new JButton("GetTicket");
+		btnGetticket.setToolTipText("Get a ticket");
 		btnGetticket.setForeground(Color.white);
 		btnGetticket.setBackground(Color.darkGray);
 		btnGetticket.addActionListener(new ActionListener() {
@@ -175,6 +177,7 @@ public class TicketClient {
 		frmTicketServer.getContentPane().add(btnGetticket, "cell 6 2");
 
 		btnDone = new JButton("Done");
+		btnDone.setToolTipText("Finished testing");
 		btnDone.setForeground(Color.white);
 		btnDone.setBackground(Color.darkGray);
 		btnDone.addActionListener(new ActionListener() {
