@@ -1,41 +1,42 @@
 package net.viperfish.ticketClient;
 
+import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Window.Type;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.net.Socket;
 import java.util.List;
 
-import javax.swing.JFrame;
-
-import net.miginfocom.swing.MigLayout;
-
-import javax.swing.JLabel;
 import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
-import java.awt.Color;
-import java.awt.Window.Type;
+
+import net.miginfocom.swing.MigLayout;
 
 public class TicketClient {
 
 	private JFrame frmTicketServer;
-	Thread worker;
-	ClientWorker w;
-	Thread updater;
-	JLabel lblMyTicket;
-	JLabel lblCurrentTicket;
-	JButton btnDone;
-	JButton btnGetticket;
+	protected Thread worker;
+	protected ClientWorker w;
+	protected Thread updater;
+	protected JLabel lblMyTicket;
+	protected JLabel lblCurrentTicket;
+	protected JButton btnDone;
+	protected JButton btnGetticket;
+	public static String myName;
 	private JTextField textField;
 	private JLabel lblIp;
 	private JButton btnConnect;
+
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					TicketClient window = new TicketClient();
@@ -51,39 +52,51 @@ public class TicketClient {
 	 * Create the application.
 	 */
 	public TicketClient() {
+		myName = new String();
 		w = new ClientWorker();
 		worker = new Thread(w);
 		updater = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
-				List<Display> updates;
-				while(true) {
-					synchronized(w) {
+				while (true) {
+					synchronized (w) {
 						try {
 							w.wait();
 						} catch (InterruptedException e) {
 							return;
 						}
 					}
-					updates = w.getTask();
-					for(Display i : updates) {
-						if(i.getLocation().equals("NumberBank")) {
-							lblMyTicket.setText(i.getContent());
-							btnDone.setEnabled(true);
+					EventQueue.invokeLater(new Runnable() {
+
+						@Override
+						public void run() {
+							List<Display> updates;
+							updates = w.getTask();
+							for (Display i : updates) {
+								if (i.getLocation().equals("NumberBank")) {
+									lblMyTicket.setText("Your Ticket:"
+											+ i.getContent());
+									btnDone.setEnabled(true);
+								}
+								if (i.getLocation().equals("UpdateNumberBank")) {
+									lblCurrentTicket.setText("Current Ticket:"
+											+ i.getContent());
+								}
+								if (i.getLocation().equals("Pop Up")) {
+									JOptionPane.showMessageDialog(null,
+											i.getContent());
+								}
+							}
+							updates.clear();
 						}
-						if(i.getLocation().equals("UpdateNumberBank")) {
-							lblCurrentTicket.setText(i.getContent());
-						}
-						if(i.getLocation().equals("Pop Up")) {
-							JOptionPane.showMessageDialog(null, i.getContent());
-						}
-					}
-					updates.clear();
+
+					});
+
 				}
-				
+
 			}
-			
+
 		});
 		initialize();
 	}
@@ -92,22 +105,25 @@ public class TicketClient {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		new NamePrompt().setVisible(true);
 		frmTicketServer = new JFrame();
 		frmTicketServer.setType(Type.UTILITY);
 		frmTicketServer.setTitle("5190 Ticket Server");
 		frmTicketServer.setBackground(Color.YELLOW);
 		frmTicketServer.setForeground(Color.RED);
-		frmTicketServer.setBounds(100, 100, 270, 174);
+		frmTicketServer.setBounds(100, 100, 345, 174);
 		frmTicketServer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frmTicketServer.getContentPane().setLayout(new MigLayout("", "[][][][][grow][][]", "[][][][][][][][][][]"));
-		
+		frmTicketServer.getContentPane().setLayout(
+				new MigLayout("", "[][][][][grow][][][]",
+						"[][][][][][][][][][]"));
+
 		lblIp = new JLabel("IP");
 		frmTicketServer.getContentPane().add(lblIp, "cell 1 0");
-		
+
 		textField = new JTextField();
-		frmTicketServer.getContentPane().add(textField, "cell 2 0,growx");
+		frmTicketServer.getContentPane().add(textField, "cell 2 0 3 1,growx");
 		textField.setColumns(10);
-		
+
 		btnConnect = new JButton("Connect");
 		btnConnect.setForeground(Color.white);
 		btnConnect.setBackground(Color.darkGray);
@@ -119,6 +135,9 @@ public class TicketClient {
 				ip = textField.getText();
 				try {
 					w.connect(ip);
+					if (myName.length() != 0) {
+						w.sendName();
+					}
 				} catch (IOException e1) {
 					textField.setText(e.toString());
 				}
@@ -126,17 +145,17 @@ public class TicketClient {
 				updater.start();
 				btnConnect.setEnabled(false);
 			}
-			
+
 		});
-		frmTicketServer.getContentPane().add(btnConnect, "cell 4 0 2 1");
-		
+		frmTicketServer.getContentPane().add(btnConnect, "cell 6 0");
+
 		lblMyTicket = new JLabel("Ticket");
 		lblMyTicket.setBackground(Color.YELLOW);
 		frmTicketServer.getContentPane().add(lblMyTicket, "cell 2 1");
-		
+
 		lblCurrentTicket = new JLabel("Current Ticket");
 		frmTicketServer.getContentPane().add(lblCurrentTicket, "cell 2 2");
-		
+
 		btnGetticket = new JButton("GetTicket");
 		btnGetticket.setForeground(Color.white);
 		btnGetticket.setBackground(Color.darkGray);
@@ -151,10 +170,10 @@ public class TicketClient {
 				}
 				btnGetticket.setEnabled(false);
 			}
-			
+
 		});
-		frmTicketServer.getContentPane().add(btnGetticket, "cell 4 2");
-		
+		frmTicketServer.getContentPane().add(btnGetticket, "cell 6 2");
+
 		btnDone = new JButton("Done");
 		btnDone.setForeground(Color.white);
 		btnDone.setBackground(Color.darkGray);
@@ -169,10 +188,11 @@ public class TicketClient {
 				}
 				btnGetticket.setEnabled(true);
 				lblMyTicket.setText("---");
+				lblCurrentTicket.setText("----");
 			}
-			
+
 		});
-		frmTicketServer.getContentPane().add(btnDone, "cell 4 8");
+		frmTicketServer.getContentPane().add(btnDone, "cell 6 8");
 		btnDone.setEnabled(false);
 	}
 

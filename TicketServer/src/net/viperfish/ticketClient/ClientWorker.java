@@ -13,10 +13,11 @@ public class ClientWorker implements Runnable {
 	SocketAddress server;
 	LinkedList<Display> toRepresent;
 	protected String currentCredential;
+
 	public ClientWorker() {
 		toRepresent = new LinkedList<Display>();
 	}
-	
+
 	public void connect(String ip) throws IOException {
 		sock = new Socket();
 		server = new InetSocketAddress(ip, 8000);
@@ -27,18 +28,22 @@ public class ClientWorker implements Runnable {
 			throw e;
 		}
 	}
-	
+
+	public void sendName() throws IOException {
+		sock.getOutputStream()
+				.write(("Name:" + TicketClient.myName).getBytes());
+	}
+
 	public void getTicket() throws IOException {
 		sock.getOutputStream().write(("GetTicket:GetTicket").getBytes());
 	}
-	
+
 	public void done() throws IOException {
 		sock.getOutputStream().write(("Done:" + currentCredential).getBytes());
-		currentCredential = new String();
 	}
 
 	public List<Display> getTask() {
-		return toRepresent;
+		return new LinkedList<Display>(toRepresent);
 	}
 
 	@Override
@@ -51,7 +56,7 @@ public class ClientWorker implements Runnable {
 		String action;
 		Display d;
 		int status;
-		while(!Thread.interrupted()) {
+		while (!Thread.interrupted()) {
 			d = new Display();
 			try {
 				status = sock.getInputStream().read(buffer);
@@ -59,48 +64,56 @@ public class ClientWorker implements Runnable {
 				return;
 			}
 			System.out.println("Get Response:" + new String(buffer));
-			if(status == -1) {
+			if (status == -1) {
 				return;
 			}
 			trimed = new byte[status];
-			for(int i =0; i< status; i++) {
+			for (int i = 0; i < status; i++) {
 				trimed[i] = buffer[i];
 			}
 			response = new String(trimed);
 			responses = response.split(",");
-			for(String i : responses) {
+			for (String i : responses) {
 				System.out.println("i:" + i);
 				part = i.split(":");
-				if(part.length != 2) {
+				if (part.length != 2) {
 					continue;
 				}
 				action = part[0];
 				part = part[1].split(";");
-				if(action.equals("Ticket")) {
+				if (action.equals("Ticket")) {
 					currentCredential = part[1];
 					d.setContent(part[0]);
 					d.setLocation("NumberBank");
-					synchronized(this) {
+					synchronized (this) {
 						toRepresent.add(d);
 
 						notifyAll();
 					}
-				} if(action.equals("CurrentNum")) {
-					d.setContent(part[0]);
+				}
+				if (action.equals("CurrentNum")) {
+					if (part.length != 2) {
+						continue;
+					}
+					d.setContent(part[0] + ", " + part[1]);
 					d.setLocation("UpdateNumberBank");
-					synchronized(this) {
+					synchronized (this) {
 						toRepresent.add(d);
 
 						notifyAll();
 					}
-				} if(action.equals("Error")) {
+				}
+				if (action.equals("Error")) {
 					d.setLocation("Pop Up");
 					d.setContent(part[1]);
-					synchronized(this) {
+					synchronized (this) {
 						toRepresent.add(d);
 
 						notifyAll();
 					}
+				}
+				if (action.equals("ConfirmedDone")) {
+					currentCredential = new String();
 				}
 			}
 		}

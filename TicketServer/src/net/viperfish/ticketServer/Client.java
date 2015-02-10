@@ -35,6 +35,15 @@ public class Client implements Runnable {
 		return true;
 	}
 
+	public synchronized boolean confirmDone() {
+		try {
+			sock.getOutputStream().write("ConfirmedDone:Confirm".getBytes());
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
+	}
+
 	public synchronized boolean pushCurrent(Ticket current) {
 
 		try {
@@ -47,7 +56,7 @@ public class Client implements Runnable {
 		return true;
 	}
 
-	public void dispose() {
+	public synchronized void dispose() {
 		exit = true;
 		try {
 			sock.close();
@@ -58,7 +67,7 @@ public class Client implements Runnable {
 		}
 	}
 
-	public String getUsername() {
+	public synchronized String getUsername() {
 		return name;
 	}
 
@@ -78,6 +87,7 @@ public class Client implements Runnable {
 		String request;
 		String[] buffer;
 		String action;
+		boolean errorInformed = false;
 		byte[] income = new byte[2048];
 		byte[] buf = null;
 		int status = 0;
@@ -104,6 +114,15 @@ public class Client implements Runnable {
 			} else {
 				action = buffer[0];
 				buffer = buffer[1].split(";");
+				if (name.length() == 0 && !action.equals("Name")) {
+					if (!errorInformed) {
+						this.reportError(new Error("User Name Not Set", 002));
+						errorInformed = true;
+						continue;
+					} else {
+						continue;
+					}
+				}
 				if (action.equals("GetTicket")) {
 					if (!sendTicket(TicketHandler.getTicket(name))) {
 						System.out.println("id" + name);

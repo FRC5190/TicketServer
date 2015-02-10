@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -33,15 +31,14 @@ public class TicketHandler {
 			System.exit(0);
 		}
 	}
-	
+
 	public static void start() {
 		pool.execute(new Runnable() {
 
 			@Override
 			public void run() {
 				Socket temp;
-				while(!Thread.interrupted())
-				{
+				while (!Thread.interrupted()) {
 					try {
 						temp = meta.accept();
 					} catch (IOException e) {
@@ -52,27 +49,28 @@ public class TicketHandler {
 					pool.execute(new Client(temp));
 				}
 			}
-			
+
 		});
 	}
-	
+
 	public synchronized static void subscribe(Client c) {
 		s.put(c.getUsername(), c);
+		c.pushCurrent(t.getFirst());
 	}
 
 	public synchronized static void unSubscribe(String id) {
-		s.get(id).dispose();
-		s.remove(id);
-		for(Ticket i : t) {
-			if(i.getSrc().equals(id)) {
+		for (Ticket i : t) {
+			if (i.getSrc().equals(id)) {
 				t.remove(i);
 			}
 		}
-		for(Map.Entry<String, Client> i : s.entrySet()) {
-			if(!t.isEmpty()) {
+		for (Map.Entry<String, Client> i : s.entrySet()) {
+			if (!t.isEmpty()) {
 				i.getValue().pushCurrent(t.getFirst());
 			}
 		}
+		s.get(id).dispose();
+		s.remove(id);
 	}
 
 	public synchronized static Ticket getTicket(String src) {
@@ -82,35 +80,38 @@ public class TicketHandler {
 		newTicket.setSrc(src);
 		t.addLast(newTicket);
 		System.out.println("Ticket Queue:" + t.size());
-		if(t.size() ==1) {
-			for(Map.Entry<String, Client> i : s.entrySet()) {
-				if(!t.isEmpty()) {
+		if (t.size() == 1) {
+			for (Map.Entry<String, Client> i : s.entrySet()) {
+				if (!t.isEmpty()) {
 					i.getValue().pushCurrent(t.getFirst());
 				}
 			}
 		}
-		current = current +1;
+		current = current + 1;
 		return newTicket;
 	}
 
 	public synchronized static void done(String credential) {
-		if(t.isEmpty()) {
+		if (t.isEmpty()) {
 			return;
 		}
 		System.out.println("Queue:" + t);
 		credential.trim();
 		String localHash;
 		localHash = t.getFirst().getCredential();
-		if(localHash.equals(credential)) {
+		if (localHash.equals(credential)) {
+			if (!s.get(t.getFirst().getSrc()).confirmDone()) {
+				unSubscribe(t.getFirst().getSrc());
+				return;
+			}
 			t.removeFirst();
-			for(Map.Entry<String, Client> i : s.entrySet()) {
-				if(!t.isEmpty()) {
-					System.out.println("Pushing " + t.getFirst().getNum() );
+			for (Map.Entry<String, Client> i : s.entrySet()) {
+				if (!t.isEmpty()) {
+					System.out.println("Pushing " + t.getFirst().getNum());
 					i.getValue().pushCurrent(t.getFirst());
 				}
 			}
-		}
-		else {
+		} else {
 			return;
 		}
 	}
