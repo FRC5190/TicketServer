@@ -86,7 +86,7 @@ public class TicketClient {
 
 	public void done() throws TicketException {
 		try {
-			w.getTicket();
+			w.done();
 		} catch (IOException e) {
 			throw new TicketException(e.getMessage(), e);
 		}
