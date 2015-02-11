@@ -20,8 +20,8 @@ public class DockedWindow implements Window {
 	private JButton btnDone;
 	private JButton btnGetticket;
 	private JButton btnUndock;
-	private JLabel lblMyTicket;
-	private JLabel lblCurrentTicket;
+	private JLabel lblMyTicketValue;
+	private JLabel lblCurrentTicketValue;
 
 	public DockedWindow(TicketClient ticketClient, MainWindow mainWindow) {
 		frmDockedWindow = new JFrame();
@@ -31,7 +31,7 @@ public class DockedWindow implements Window {
 		frmDockedWindow.setUndecorated(true);
 		frmDockedWindow.setBackground(Color.YELLOW);
 		frmDockedWindow.setForeground(Color.RED);
-		frmDockedWindow.setBounds(100, 100, 400, 40);
+		frmDockedWindow.setBounds(100, 100, 450, 40);
 		frmDockedWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JPanel contentPane = new JPanel();
@@ -40,14 +40,19 @@ public class DockedWindow implements Window {
 		contentPane.addMouseMotionListener(moveMouseListener);
 		frmDockedWindow.setContentPane(contentPane);
 
-		contentPane.setLayout(new MigLayout("", "[][][][][][][][][][]", "[]"));
+		contentPane.setLayout(new MigLayout("", "[][grow][][grow][][][][][][]",
+				"[]"));
 
-		lblMyTicket = new JLabel("Ticket");
-		lblMyTicket.setBackground(Color.YELLOW);
-		contentPane.add(lblMyTicket, "cell 1 0");
+		JLabel lblMyTicket = new JLabel("T:");
+		contentPane.add(lblMyTicket, "cell 0 0");
+		lblMyTicketValue = new JLabel();
+		lblMyTicketValue.setBackground(Color.YELLOW);
+		contentPane.add(lblMyTicketValue, "cell 1 0");
 
-		lblCurrentTicket = new JLabel("Current Ticket");
+		JLabel lblCurrentTicket = new JLabel("CT:");
 		contentPane.add(lblCurrentTicket, "cell 2 0");
+		lblCurrentTicketValue = new JLabel();
+		contentPane.add(lblCurrentTicketValue, "cell 3 0");
 
 		btnGetticket = new JButton("GetTicket");
 		btnGetticket.setToolTipText("Get a ticket");
@@ -66,7 +71,7 @@ public class DockedWindow implements Window {
 			}
 
 		});
-		contentPane.add(btnGetticket, "cell 4 0");
+		contentPane.add(btnGetticket, "cell 5 0");
 
 		btnDone = new JButton("Done");
 		btnDone.setToolTipText("Finished with ticket");
@@ -82,11 +87,11 @@ public class DockedWindow implements Window {
 					JOptionPane.showMessageDialog(null, ex);
 				}
 				btnGetticket.setEnabled(true);
-				lblMyTicket.setText("---");
+				lblMyTicketValue.setText("---");
 			}
 
 		});
-		contentPane.add(btnDone, "cell 5 0");
+		contentPane.add(btnDone, "cell 6 0");
 		btnDone.setEnabled(false);
 
 		btnUndock = new JButton("Undock");
@@ -101,7 +106,7 @@ public class DockedWindow implements Window {
 				ticketClient.setCurrentWindow(mainWindow);
 			}
 		});
-		contentPane.add(btnUndock, "cell 6 0");
+		contentPane.add(btnUndock, "cell 7 0");
 	}
 
 	@Override
@@ -118,11 +123,11 @@ public class DockedWindow implements Window {
 	public void updateDisplay(List<Display> displayUpdates) {
 		for (Display i : displayUpdates) {
 			if (i.getLocation().equals("NumberBank")) {
-				lblMyTicket.setText(i.getContent());
+				lblMyTicketValue.setText(i.getContent());
 				btnDone.setEnabled(true);
 			}
 			if (i.getLocation().equals("UpdateNumberBank")) {
-				lblCurrentTicket.setText(i.getContent());
+				lblCurrentTicketValue.setText(i.getContent());
 			}
 			if (i.getLocation().equals("Pop Up")) {
 				JOptionPane.showMessageDialog(null, i.getContent());
