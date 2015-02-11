@@ -51,16 +51,17 @@ public class MainWindow implements Window {
 		contentPane.add(txtIp, "cell 2 0,growx");
 
 		btnConnect = new JButton("Connect");
+		btnConnect.setToolTipText("Connect to the server at the ip address");
 		btnConnect.setForeground(Color.white);
 		btnConnect.setBackground(Color.darkGray);
 		btnConnect.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String ip;
-				ip = txtIp.getText();
+				String ip = txtIp.getText();
+				String name = txtName.getText();
 				try {
-					ticketClient.connect(ip);
+					ticketClient.connect(ip, name);
 				} catch (TicketException ex) {
 					txtIp.setText(ex.getMessage());
 				}
@@ -84,6 +85,7 @@ public class MainWindow implements Window {
 		contentPane.add(lblCurrentTicket, "cell 2 3");
 
 		btnGetticket = new JButton("GetTicket");
+		btnGetticket.setToolTipText("Get a ticket");
 		btnGetticket.setForeground(Color.white);
 		btnGetticket.setBackground(Color.darkGray);
 		btnGetticket.addActionListener(new ActionListener() {
@@ -102,6 +104,7 @@ public class MainWindow implements Window {
 		contentPane.add(btnGetticket, "cell 4 3");
 
 		btnDone = new JButton("Done");
+		btnDone.setToolTipText("Finished with ticket");
 		btnDone.setForeground(Color.white);
 		btnDone.setBackground(Color.darkGray);
 		btnDone.addActionListener(new ActionListener() {
@@ -115,6 +118,7 @@ public class MainWindow implements Window {
 				}
 				btnGetticket.setEnabled(true);
 				lblMyTicket.setText("---");
+				lblCurrentTicket.setText("---");
 			}
 
 		});

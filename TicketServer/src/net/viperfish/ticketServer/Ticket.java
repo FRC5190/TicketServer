@@ -3,7 +3,7 @@ package net.viperfish.ticketServer;
 public class Ticket {
 	protected String credential;
 	protected int num;
-	protected int src;
+	protected String src;
 	public Ticket() {
 		credential = new String();
 	}
@@ -24,11 +24,11 @@ public class Ticket {
 		return num;
 	}
 	
-	public int getSrc() {
+	public String getSrc() {
 		return src;
 	}
 	
-	public void setSrc(int src) {
+	public void setSrc(String src) {
 		this.src = src;
 	}
 	

@@ -8,12 +8,15 @@ public class TicketClient {
 	private Window currentWindow;
 
 	private ClientWorker w;
+	private Thread worker;
+	private Thread updater;
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					new TicketClient();
@@ -32,8 +35,8 @@ public class TicketClient {
 		currentWindow.show();
 
 		w = new ClientWorker();
-		Thread worker = new Thread(w);
-		Thread updater = new Thread(new Runnable() {
+		worker = new Thread(w);
+		updater = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
@@ -54,20 +57,23 @@ public class TicketClient {
 			}
 
 		});
-		worker.start();
-		updater.start();
 	}
 
 	public synchronized void setCurrentWindow(Window currentWindow) {
 		this.currentWindow = currentWindow;
 	}
 
-	public void connect(String ip) throws TicketException {
+	public void connect(String ip, String name) throws TicketException {
 		try {
 			w.connect(ip);
+			if (name.length() != 0) {
+				w.sendName(name);
+			}
 		} catch (IOException e) {
-
+			throw new TicketException(e.getMessage(), e);
 		}
+		worker.start();
+		updater.start();
 	}
 
 	public void getTicket() throws TicketException {

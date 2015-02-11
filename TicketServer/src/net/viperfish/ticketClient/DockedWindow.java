@@ -50,6 +50,7 @@ public class DockedWindow implements Window {
 		contentPane.add(lblCurrentTicket, "cell 2 0");
 
 		btnGetticket = new JButton("GetTicket");
+		btnGetticket.setToolTipText("Get a ticket");
 		btnGetticket.setForeground(Color.white);
 		btnGetticket.setBackground(Color.darkGray);
 		btnGetticket.addActionListener(new ActionListener() {
@@ -68,6 +69,7 @@ public class DockedWindow implements Window {
 		contentPane.add(btnGetticket, "cell 4 0");
 
 		btnDone = new JButton("Done");
+		btnDone.setToolTipText("Finished with ticket");
 		btnDone.setForeground(Color.white);
 		btnDone.setBackground(Color.darkGray);
 		btnDone.addActionListener(new ActionListener() {
