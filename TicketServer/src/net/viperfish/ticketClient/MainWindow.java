@@ -30,12 +30,17 @@ public class MainWindow implements Window {
 	private JTextField txtName;
 
 	public MainWindow(TicketClient ticketClient) {
+		ClientProperties properties = ClientProperties.getInstance();
 		frmMainWindow = new JFrame();
 		frmMainWindow.setType(Type.UTILITY);
 		frmMainWindow.setTitle("5190 Ticket Server");
 		frmMainWindow.setBackground(Color.YELLOW);
 		frmMainWindow.setForeground(Color.RED);
-		frmMainWindow.setBounds(100, 100, 320, 220);
+		int x = properties.getInt("window.main.position.x", 100);
+		int y = properties.getInt("window.main.position.y", 100);
+		int width = properties.getInt("window.main.width", 320);
+		int height = properties.getInt("window.main.height", 220);
+		frmMainWindow.setBounds(x, y, width, height);
 		frmMainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JPanel contentPane = new JPanel();
@@ -48,6 +53,7 @@ public class MainWindow implements Window {
 		contentPane.add(lblIp, "cell 1 0");
 
 		txtIp = new JTextField(10);
+		txtIp.setText(properties.getString("ip", ""));
 		contentPane.add(txtIp, "cell 2 0,growx");
 
 		btnConnect = new JButton("Connect");
@@ -60,6 +66,7 @@ public class MainWindow implements Window {
 			public void actionPerformed(ActionEvent e) {
 				String ip = txtIp.getText();
 				String name = txtName.getText();
+				saveProperties();
 				try {
 					ticketClient.connect(ip, name);
 				} catch (TicketException ex) {
@@ -75,6 +82,7 @@ public class MainWindow implements Window {
 		contentPane.add(lblName, "cell 1 1");
 
 		txtName = new JTextField(10);
+		txtName.setText(properties.getString("name", ""));
 		contentPane.add(txtName, "cell 2 1,growx");
 
 		JLabel lblMyTicket = new JLabel("Ticket");
@@ -172,5 +180,15 @@ public class MainWindow implements Window {
 				JOptionPane.showMessageDialog(null, i.getContent());
 			}
 		}
+	}
+
+	private void saveProperties() {
+		ClientProperties properties = ClientProperties.getInstance();
+		properties.put("ip", txtIp.getText());
+		properties.put("name", txtName.getText());
+		properties.put("window.main.position.x", frmMainWindow.getX());
+		properties.put("window.main.position.y", frmMainWindow.getY());
+		properties.put("window.main.width", frmMainWindow.getWidth());
+		properties.put("window.main.height", frmMainWindow.getHeight());
 	}
 }
