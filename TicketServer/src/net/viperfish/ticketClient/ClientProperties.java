@@ -84,7 +84,6 @@ public class ClientProperties {
 	 * Get the string property. Returns the defaultString if property doesn't
 	 * exist.
 	 */
-
 	public String getString(String key, String defaultString) {
 		return properties.getOrDefault(key, defaultString).toString();
 	}
