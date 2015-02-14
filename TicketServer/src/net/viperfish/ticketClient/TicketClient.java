@@ -46,8 +46,8 @@ public class TicketClient {
 						} catch (InterruptedException e) {
 							return;
 						}
+						currentWindow.updateDisplay();
 					}
-					currentWindow.updateDisplay();
 				}
 
 			}

@@ -3,17 +3,22 @@ package net.viperfish.ticketClient;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.LinkedList;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+
+import net.viperfish.ticketServer.Ticket;
 
 public class ClientWorker implements Runnable {
 
 	SSLSocket sock;
 	SocketAddress server;
 	protected String currentCredential;
+	protected LinkedList<Ticket> myTickets;
 
 	public ClientWorker() {
+		myTickets = new LinkedList<Ticket>();
 	}
 
 	public void connect(String ip) throws IOException {
@@ -38,7 +43,11 @@ public class ClientWorker implements Runnable {
 	}
 
 	public void done() throws IOException {
-		sock.getOutputStream().write(("Done:" + currentCredential).getBytes());
+		if (myTickets.isEmpty()) {
+			return;
+		}
+		sock.getOutputStream().write(
+				("Done:" + myTickets.getFirst().getCredential()).getBytes());
 	}
 
 	@Override
@@ -49,9 +58,11 @@ public class ClientWorker implements Runnable {
 		String[] part;
 		String[] responses;
 		String action;
+		Ticket temp;
 		Display d = Display.getInstance();
 		int status;
 		while (!Thread.interrupted()) {
+			temp = new Ticket();
 			try {
 				status = sock.getInputStream().read(buffer);
 			} catch (IOException e) {
@@ -76,8 +87,10 @@ public class ClientWorker implements Runnable {
 				action = part[0];
 				part = part[1].split(";");
 				if (action.equals("Ticket")) {
-					currentCredential = part[1];
-					d.put("ticket", part[0]);
+					temp.setCredential(part[1]);
+					temp.setNum(Integer.parseInt(part[0]));
+					myTickets.add(temp);
+					d.put("ticket", Integer.toString(temp.getNum()));
 
 				}
 				if (action.equals("CurrentNum")) {
@@ -85,19 +98,26 @@ public class ClientWorker implements Runnable {
 						continue;
 					}
 					d.put("currentTicket", part[0] + ", " + part[1]);
-					synchronized (this) {
-						notifyAll();
-					}
 				}
 				if (action.equals("Error")) {
 					d.put("error", part[1]);
-					synchronized (this) {
-						notifyAll();
-					}
 				}
 				if (action.equals("ConfirmedDone")) {
-					currentCredential = new String();
+					if (myTickets.isEmpty()) {
+						d.put("ticket", "---");
+					} else {
+						d.put("ticket",
+								Integer.toString(myTickets.getFirst().getNum()));
+						myTickets.removeFirst();
+						if (myTickets.isEmpty()) {
+							d.put("ticket", "---");
+						}
+					}
+					d.put("currentTicket", "---");
 				}
+			}
+			synchronized (this) {
+				notifyAll();
 			}
 		}
 	}
