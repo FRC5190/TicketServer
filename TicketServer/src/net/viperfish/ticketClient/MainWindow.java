@@ -109,6 +109,7 @@ public class MainWindow implements Window {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					ticketClient.getTicket();
+					updateDisplay();
 				} catch (TicketException ex) {
 					JOptionPane.showMessageDialog(null, ex);
 				}

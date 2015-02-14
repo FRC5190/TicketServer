@@ -49,7 +49,7 @@ public class DockedWindow implements Window {
 		JLabel lblMyTicket = new JLabel("T:");
 		contentPane.add(lblMyTicket, "cell 0 0");
 		lblMyTicketValue = new JLabel();
-		lblMyTicket.setText(display.get("ticket", "---"));
+		lblMyTicketValue.setText(display.get("ticket", "---"));
 		lblMyTicketValue.setBackground(Color.YELLOW);
 		contentPane.add(lblMyTicketValue, "cell 1 0");
 
@@ -69,6 +69,7 @@ public class DockedWindow implements Window {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					ticketClient.getTicket();
+					updateDisplay();
 					saveProperties();
 				} catch (TicketException ex) {
 					JOptionPane.showMessageDialog(null, ex);
