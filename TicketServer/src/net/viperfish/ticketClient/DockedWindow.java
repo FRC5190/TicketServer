@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Window.Type;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -24,6 +23,8 @@ public class DockedWindow implements Window {
 	private JLabel lblCurrentTicketValue;
 
 	public DockedWindow(TicketClient ticketClient, MainWindow mainWindow) {
+		Display display = Display.getInstance();
+		ClientProperties properties = ClientProperties.getInstance();
 		frmDockedWindow = new JFrame();
 		frmDockedWindow.setType(Type.UTILITY);
 		frmDockedWindow.setTitle("5190 Ticket Server");
@@ -31,7 +32,9 @@ public class DockedWindow implements Window {
 		frmDockedWindow.setUndecorated(true);
 		frmDockedWindow.setBackground(Color.YELLOW);
 		frmDockedWindow.setForeground(Color.RED);
-		frmDockedWindow.setBounds(100, 100, 450, 40);
+		int x = properties.getInt("window.docked.position.x", 400);
+		int y = properties.getInt("window.docked.position.y", 0);
+		frmDockedWindow.setBounds(x, y, 450, 40);
 		frmDockedWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JPanel contentPane = new JPanel();
@@ -46,12 +49,14 @@ public class DockedWindow implements Window {
 		JLabel lblMyTicket = new JLabel("T:");
 		contentPane.add(lblMyTicket, "cell 0 0");
 		lblMyTicketValue = new JLabel();
+		lblMyTicket.setText(display.get("ticket", "---"));
 		lblMyTicketValue.setBackground(Color.YELLOW);
 		contentPane.add(lblMyTicketValue, "cell 1 0");
 
 		JLabel lblCurrentTicket = new JLabel("CT:");
 		contentPane.add(lblCurrentTicket, "cell 2 0");
 		lblCurrentTicketValue = new JLabel();
+		lblCurrentTicketValue.setText(display.get("currentTicket", "---"));
 		contentPane.add(lblCurrentTicketValue, "cell 3 0");
 
 		btnGetticket = new JButton("GetTicket");
@@ -64,6 +69,7 @@ public class DockedWindow implements Window {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					ticketClient.getTicket();
+					saveProperties();
 				} catch (TicketException ex) {
 					JOptionPane.showMessageDialog(null, ex);
 				}
@@ -102,8 +108,9 @@ public class DockedWindow implements Window {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				hide();
-				mainWindow.show();
 				ticketClient.setCurrentWindow(mainWindow);
+				mainWindow.updateDisplay();
+				mainWindow.show();
 			}
 		});
 		contentPane.add(btnUndock, "cell 7 0");
@@ -120,18 +127,24 @@ public class DockedWindow implements Window {
 	}
 
 	@Override
-	public void updateDisplay(List<Display> displayUpdates) {
-		for (Display i : displayUpdates) {
-			if (i.getLocation().equals("NumberBank")) {
-				lblMyTicketValue.setText(i.getContent());
-				btnDone.setEnabled(true);
-			}
-			if (i.getLocation().equals("UpdateNumberBank")) {
-				lblCurrentTicketValue.setText(i.getContent());
-			}
-			if (i.getLocation().equals("Pop Up")) {
-				JOptionPane.showMessageDialog(null, i.getContent());
-			}
+	public void updateDisplay() {
+		Display display = Display.getInstance();
+		String ticket = display.get("ticket");
+		if (ticket != null) {
+			lblMyTicketValue.setText(ticket);
+			btnDone.setEnabled(true);
 		}
+		lblCurrentTicketValue.setText(display.get("currentTicket", "---"));
+		String error = display.get("error");
+		if (error != null) {
+			JOptionPane.showMessageDialog(null, error);
+			display.remove("error");
+		}
+	}
+
+	private void saveProperties() {
+		ClientProperties properties = ClientProperties.getInstance();
+		properties.put("window.docked.position.x", frmDockedWindow.getX());
+		properties.put("window.docked.position.y", frmDockedWindow.getY());
 	}
 }

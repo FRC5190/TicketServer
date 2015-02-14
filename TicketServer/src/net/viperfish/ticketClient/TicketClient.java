@@ -2,7 +2,6 @@ package net.viperfish.ticketClient;
 
 import java.awt.EventQueue;
 import java.io.IOException;
-import java.util.List;
 
 public class TicketClient {
 	private Window currentWindow;
@@ -40,7 +39,6 @@ public class TicketClient {
 
 			@Override
 			public void run() {
-				List<Display> updates;
 				while (true) {
 					synchronized (w) {
 						try {
@@ -49,9 +47,7 @@ public class TicketClient {
 							return;
 						}
 					}
-					updates = w.getTask();
-					currentWindow.updateDisplay(updates);
-					updates.clear();
+					currentWindow.updateDisplay();
 				}
 
 			}

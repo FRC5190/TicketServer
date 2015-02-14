@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Window.Type;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -30,6 +29,7 @@ public class MainWindow implements Window {
 	private JTextField txtName;
 
 	public MainWindow(TicketClient ticketClient) {
+		Display display = Display.getInstance();
 		ClientProperties properties = ClientProperties.getInstance();
 		frmMainWindow = new JFrame();
 		frmMainWindow.setType(Type.UTILITY);
@@ -73,6 +73,7 @@ public class MainWindow implements Window {
 					txtIp.setText(ex.getMessage());
 				}
 				btnConnect.setEnabled(false);
+				btnDock.setEnabled(true);
 			}
 
 		});
@@ -88,13 +89,15 @@ public class MainWindow implements Window {
 		JLabel lblMyTicket = new JLabel("Ticket");
 		contentPane.add(lblMyTicket, "cell 1 2");
 		lblMyTicketValue = new JLabel();
+		lblMyTicketValue.setText(display.get("ticket", "---"));
 		lblMyTicketValue.setBackground(Color.YELLOW);
-		contentPane.add(lblMyTicketValue, "cell 2 2");
+		contentPane.add(lblMyTicketValue, "cell 2 2,growx");
 
 		JLabel lblCurrentTicket = new JLabel("Current Ticket");
 		contentPane.add(lblCurrentTicket, "cell 1 3");
 		lblCurrentTicketValue = new JLabel();
-		contentPane.add(lblCurrentTicketValue, "cell 2 3");
+		lblCurrentTicketValue.setText(display.get("currentTicket", "---"));
+		contentPane.add(lblCurrentTicketValue, "cell 2 3,growx");
 
 		btnGetticket = new JButton("GetTicket");
 		btnGetticket.setToolTipText("Get a ticket");
@@ -149,10 +152,12 @@ public class MainWindow implements Window {
 					dockedWindow = new DockedWindow(ticketClient,
 							MainWindow.this);
 				}
-				dockedWindow.show();
 				ticketClient.setCurrentWindow(dockedWindow);
+				dockedWindow.updateDisplay();
+				dockedWindow.show();
 			}
 		});
+		btnDock.setEnabled(false);
 		contentPane.add(btnDock, "cell 4 8");
 	}
 
@@ -167,18 +172,19 @@ public class MainWindow implements Window {
 	}
 
 	@Override
-	public void updateDisplay(List<Display> displayUpdates) {
-		for (Display i : displayUpdates) {
-			if (i.getLocation().equals("NumberBank")) {
-				lblMyTicketValue.setText(i.getContent());
-				btnDone.setEnabled(true);
-			}
-			if (i.getLocation().equals("UpdateNumberBank")) {
-				lblCurrentTicketValue.setText(i.getContent());
-			}
-			if (i.getLocation().equals("Pop Up")) {
-				JOptionPane.showMessageDialog(null, i.getContent());
-			}
+	public void updateDisplay() {
+		System.out.println("DISPLAY UPDATED");
+		Display display = Display.getInstance();
+		String ticket = display.get("ticket");
+		if (ticket != null) {
+			lblMyTicketValue.setText(ticket);
+			btnDone.setEnabled(true);
+		}
+		lblCurrentTicketValue.setText(display.get("currentTicket", "---"));
+		String error = display.get("error");
+		if (error != null) {
+			JOptionPane.showMessageDialog(null, error);
+			display.remove("error");
 		}
 	}
 

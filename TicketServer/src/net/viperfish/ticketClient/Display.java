@@ -1,36 +1,42 @@
 package net.viperfish.ticketClient;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Display {
-	protected String location;
-	protected String content;
-	protected String attribute;
+	private Map<String, String> displayMap = Collections
+			.synchronizedMap(new HashMap<String, String>());
 
-	public Display() {
-		location = new String();
-		content = new String();
+	private static Display instance = new Display();
+
+	private Display() {
 	}
 
-	public void setLocation(String loc) {
-		location = loc;
+	public static Display getInstance() {
+		return instance;
 	}
 
-	public void setContent(String content) {
-		this.content = content;
+	/**
+	 * Returns null if key not found.
+	 */
+	public String get(String key) {
+		return displayMap.get(key);
 	}
 
-	public String getContent() {
-		return content;
+	public String get(String key, String defaultString) {
+		String value = displayMap.get(key);
+		if (value == null) {
+			return defaultString;
+		}
+		return value;
 	}
 
-	public String getLocation() {
-		return location;
+	public void put(String key, String value) {
+		displayMap.put(key, value);
 	}
 
-	public void setAttr(String attr) {
-		attribute = attr;
-	}
-
-	public String getAttribute() {
-		return attribute;
+	public void remove(String key) {
+		displayMap.remove(key);
 	}
 }

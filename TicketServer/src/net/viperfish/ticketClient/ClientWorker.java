@@ -3,8 +3,6 @@ package net.viperfish.ticketClient;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.LinkedList;
-import java.util.List;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -13,11 +11,9 @@ public class ClientWorker implements Runnable {
 
 	SSLSocket sock;
 	SocketAddress server;
-	LinkedList<Display> toRepresent;
 	protected String currentCredential;
 
 	public ClientWorker() {
-		toRepresent = new LinkedList<Display>();
 	}
 
 	public void connect(String ip) throws IOException {
@@ -45,10 +41,6 @@ public class ClientWorker implements Runnable {
 		sock.getOutputStream().write(("Done:" + currentCredential).getBytes());
 	}
 
-	public List<Display> getTask() {
-		return new LinkedList<Display>(toRepresent);
-	}
-
 	@Override
 	public void run() {
 		byte[] buffer = new byte[2048];
@@ -57,10 +49,9 @@ public class ClientWorker implements Runnable {
 		String[] part;
 		String[] responses;
 		String action;
-		Display d;
+		Display d = Display.getInstance();
 		int status;
 		while (!Thread.interrupted()) {
-			d = new Display();
 			try {
 				status = sock.getInputStream().read(buffer);
 			} catch (IOException e) {
@@ -86,32 +77,21 @@ public class ClientWorker implements Runnable {
 				part = part[1].split(";");
 				if (action.equals("Ticket")) {
 					currentCredential = part[1];
-					d.setContent(part[0]);
-					d.setLocation("NumberBank");
-					synchronized (this) {
-						toRepresent.add(d);
+					d.put("ticket", part[0]);
 
-						notifyAll();
-					}
 				}
 				if (action.equals("CurrentNum")) {
 					if (part.length != 2) {
 						continue;
 					}
-					d.setContent(part[0] + ", " + part[1]);
-					d.setLocation("UpdateNumberBank");
+					d.put("currentTicket", part[0] + ", " + part[1]);
 					synchronized (this) {
-						toRepresent.add(d);
-
 						notifyAll();
 					}
 				}
 				if (action.equals("Error")) {
-					d.setLocation("Pop Up");
-					d.setContent(part[1]);
+					d.put("error", part[1]);
 					synchronized (this) {
-						toRepresent.add(d);
-
 						notifyAll();
 					}
 				}
