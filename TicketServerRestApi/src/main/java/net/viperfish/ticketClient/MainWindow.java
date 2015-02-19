@@ -28,7 +28,7 @@ public class MainWindow implements Window {
 	private JTextField txtIp;
 	private JTextField txtName;
 
-	public MainWindow(TicketClient ticketClient) {
+	public MainWindow(final TicketClient ticketClient) {
 		Display display = Display.getInstance();
 		ClientProperties properties = ClientProperties.getInstance();
 		frmMainWindow = new JFrame();

@@ -22,7 +22,8 @@ public class DockedWindow implements Window {
 	private JLabel lblMyTicketValue;
 	private JLabel lblCurrentTicketValue;
 
-	public DockedWindow(TicketClient ticketClient, MainWindow mainWindow) {
+	public DockedWindow(final TicketClient ticketClient,
+			final MainWindow mainWindow) {
 		Display display = Display.getInstance();
 		ClientProperties properties = ClientProperties.getInstance();
 		frmDockedWindow = new JFrame();

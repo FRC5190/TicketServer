@@ -5,10 +5,10 @@ import java.io.IOException;
 
 public class TicketClient {
 	private Window currentWindow;
-
 	private ClientWorker w;
 	private Thread worker;
 	private Thread updater;
+	private Thread currentUpdater;
 
 	/**
 	 * Launch the application.
@@ -35,6 +35,7 @@ public class TicketClient {
 
 		w = new ClientWorker();
 		worker = new Thread(w);
+
 		updater = new Thread(new Runnable() {
 
 			@Override
@@ -63,13 +64,15 @@ public class TicketClient {
 		try {
 			w.connect(ip);
 			if (name.length() != 0) {
-				w.sendName(name);
+				w.setName(name);
 			}
 		} catch (IOException e) {
 			throw new TicketException(e.getMessage(), e);
 		}
+		currentUpdater = new Thread(new CurrentUpdater(ip, w));
 		worker.start();
 		updater.start();
+		currentUpdater.start();
 	}
 
 	public void getTicket() throws TicketException {
