@@ -44,6 +44,7 @@ public class TicketHandler {
 					+ " Owner:" + i.getValue().getOwner() + "</li>";
 			htmlListBlock += htmlListItem;
 		}
+
 		m.addAttribute("ticketList", htmlListBlock);
 		return "home";
 	}
